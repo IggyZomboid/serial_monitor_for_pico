@@ -24,7 +24,7 @@
       <x>10</x>
       <y>180</y>
       <width>771</width>
-      <height>391</height>
+      <height>361</height>
      </rect>
     </property>
     <property name="acceptDrops">
@@ -199,7 +199,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="connect_Button">
+   <widget class="QPushButton" name="connect_button">
     <property name="geometry">
      <rect>
       <x>640</x>
@@ -210,6 +210,19 @@
     </property>
     <property name="text">
      <string>Connect</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clear_button">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>550</y>
+      <width>771</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clear Output</string>
     </property>
    </widget>
   </widget>
