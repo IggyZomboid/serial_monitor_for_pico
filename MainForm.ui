@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -142,12 +142,22 @@
      <string>Clear Output</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="data_view_button">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>580</y>
+      <width>101</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Data View</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="view_radio_buttons_group"/>
- </buttongroups>
 </ui>

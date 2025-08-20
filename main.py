@@ -6,6 +6,7 @@ import configparser
 from PyQt5 import QtWidgets, uic, QtCore
 from serial.tools import list_ports
 from datetime import datetime
+import re
 
 BAUD_RATE = 115200
 
@@ -45,7 +46,7 @@ class AppConfig:
         if 'user_settings' in self.config:
             # Convert values to integers where necessary
             self.last_selected_port = int(self.config['user_settings'].get('selected_port', 0))
-            print(f"Last selected port: {self.last_selected_port}")
+            # print(f"Last selected port: {self.last_selected_port}")
     
     def save_user_settings(self):
         """
@@ -54,7 +55,7 @@ class AppConfig:
         This method updates the configuration file with the latest user settings,
         ensuring that all values are converted to strings before saving.
         """
-        print("Saving user settings...")  # Debug statement
+        # print("Saving user settings...")  # Debug statement
 
         if 'user_settings' not in self.config:
             self.config['user_settings'] = {}
@@ -62,21 +63,21 @@ class AppConfig:
         # Convert all values to strings before saving
         self.config['user_settings']['selected_port'] = str(self.last_selected_port)
 
-        # Debug print to verify the values being saved
-        print("Config to save:", dict(self.config['user_settings']))
+        # Debug # print to verify the values being saved
+        # print("Config to save:", dict(self.config['user_settings']))
 
         # Write the settings to the file
         with open('settings.ini', 'w') as configfile:
             self.config.write(configfile)
 
-        print("Settings saved!")  # Debug statement
+        # print("Settings saved!")  # Debug statement
     # Removed duplicate __init__ method to avoid overriding the first implementation.
     
     def save_user_settings(self):
         """
         Saves the current user settings to 'settings.ini'.
         """
-        print("Saving user settings...")  # Debug statement
+        # print("Saving user settings...")  # Debug statement
 
         if 'user_settings' not in self.config:
             self.config['user_settings'] = {}
@@ -84,14 +85,14 @@ class AppConfig:
         # Convert all values to strings before saving
         self.config['user_settings']['selected_port'] = str(self.last_selected_port)
 
-        # Debug print to verify the values being saved
-        print("Config to save:", dict(self.config['user_settings']))
+        # Debug # print to verify the values being saved
+        # print("Config to save:", dict(self.config['user_settings']))
 
         # Write the settings to the file
         with open('settings.ini', 'w') as configfile:
             self.config.write(configfile)
 
-        print("Settings saved!")  # Debug statement
+        # print("Settings saved!")  # Debug statement
             
 # Create a global instance
 app_config = AppConfig()
@@ -228,6 +229,53 @@ class SerialReaderThread(threading.Thread):
         if self.serial_port.is_open:
             self.serial_port.close()  # Close the serial port if open
 
+class Data_View_Window(QtWidgets.QMainWindow):
+    """
+    A class to represent a data view window in the application.
+
+    This class is intended to provide a separate window for displaying data
+    from the serial port or other sources. It inherits from QMainWindow and
+    can be customized with additional UI elements and functionality.
+
+    Attributes:
+        None (currently, but can be extended with UI elements).
+    """
+    def __init__(self):
+        super(Data_View_Window, self).__init__()
+        uic.loadUi('Data_view_window.ui', self)
+        
+        self.input_name_text = self.findChild(QtWidgets.QPlainTextEdit, 'input_name_text')
+        self.preview_txt_label = self.findChild(QtWidgets.QLabel, 'preview_txt_label')
+        self.input_name_text.textChanged.connect(self.validateNameText)
+        self.show()
+    
+       
+    def validateNameText(self):
+        """
+        Validates the input name text to ensure it is not empty.
+        If empty, sets the text to 'Default Name'.
+        """
+        print("Validating input name text...")
+        print(f"Current text: {self.input_name_text.toPlainText()}")
+        if not self.input_name_text.toPlainText():
+            print("Input name text is empty, setting to 'Default Name'.")
+            self.input_name_text.setPlainText('Default Name')
+        else:
+            print("Input name text is not empty, proceeding with sanitization.")
+        # Replace spaces with underscores first
+        sanitized_text = self.input_name_text.toPlainText().replace(' ', '_')
+        print("Replacing spaces with underscores in input name text...")
+        
+        # Remove any character that is not alphanumeric, underscore, or hyphen
+        sanitized_text = re.sub(r'[^a-zA-Z0-9_-]', '', sanitized_text)
+        if sanitized_text != self.input_name_text.toPlainText():
+            print(f"Sanitized text: {sanitized_text}")
+        
+        self.preview_txt_label.setText(sanitized_text)
+        
+        print(sanitized_text)
+               
+
 # Main Window Class
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -240,13 +288,17 @@ class MainWindow(QtWidgets.QMainWindow):
         connect_button (QtWidgets.QPushButton): Button to connect to the selected COM port.
         refresh_ports_Button (QtWidgets.QPushButton): Button to refresh the list of available COM ports.
         clear_button (QtWidgets.QPushButton): Button to clear the output text area.
+        data_view_button (QtWidgets.QPushButton): Button to open the data view window.
         output_text (QtWidgets.QTextEdit): Text area for displaying messages and logs.
         ser (serial.Serial or None): Serial port object for communication.
         serial_thread (SerialReaderThread or None): Thread for reading data from the serial port.
         timer (QtCore.QTimer): Timer to periodically check for available COM ports.
+
     Methods:
         __init__():
             Initializes the MainWindow, sets up the UI, and connects button actions to their handlers.
+        data_view_button_clicked():
+            Opens the data view window when the data view button is clicked.
         get_com_ports(silent=False):
             Scans for available COM ports and updates the dropdown list.
         port_changed():
@@ -265,15 +317,21 @@ class MainWindow(QtWidgets.QMainWindow):
             Handles the window close event to save user settings and disconnect from the serial port.
     """
     def __init__(self):
+        """
+        Initializes the MainWindow, sets up the UI, and connects button actions to their handlers.
+
+        - Loads the UI from the 'MainForm.ui' file.
+        - Retrieves and initializes UI elements such as buttons, combo boxes, and text areas.
+        - Sets up event handlers for button clicks and combo box changes.
+        - Starts a timer to periodically check for available COM ports.
+        """
         super(MainWindow, self).__init__()
         uic.loadUi('MainForm.ui', self)
         self.get_com_ports()
         # Get all UI elements
         self.port_comboBox = self.findChild(QtWidgets.QComboBox, 'port_comboBox')  
-        # Populate the combo box
-        # self.port_comboBox.addItems(com_ports.keys())  
-        print(f"app_config.last_selected_port: {app_config.last_selected_port}")
-        # does the combo box have an item at index app_config.last_selected_port?
+        # print(f"app_config.last_selected_port: {app_config.last_selected_port}")
+        # Set the combo box to the last selected port or default to the first item
         if self.port_comboBox.count() > app_config.last_selected_port:
             self.port_comboBox.setCurrentIndex(app_config.last_selected_port)
         else:
@@ -282,28 +340,34 @@ class MainWindow(QtWidgets.QMainWindow):
         self.connect_button = self.findChild(QtWidgets.QPushButton, 'connect_button')
         self.refresh_ports_Button = self.findChild(QtWidgets.QPushButton, 'refresh_ports_Button')
         self.clear_button = self.findChild(QtWidgets.QPushButton, 'clear_button')
+        self.data_view_button = self.findChild(QtWidgets.QPushButton, 'data_view_button')
         self.output_text = self.findChild(QtWidgets.QTextEdit, 'output_text')
         
-        #update AppConfig fields when values change
+        # Update AppConfig fields when values change
         self.port_comboBox.currentIndexChanged.connect(self.port_changed)
 
         # Connect buttons to their handlers
         self.refresh_ports_Button.clicked.connect(self.refresh_ports)
         self.connect_button.clicked.connect(self.connect_port)
         self.clear_button.clicked.connect(self.output_text.clear)  # Clear output text area
-
+        self.data_view_button.clicked.connect(self.data_view_button_clicked)  # Open data view window
+        
         # Serial port placeholder
         self.ser = None
 
-        #timer to check every 500ms if the serial port is open
+        # Timer to check every 2 seconds if the serial port is open
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(lambda: self.get_com_ports(True))
         self.timer.start(2000)
         
-   
         self.show()
 
-    # Get COM Ports
+    def data_view_button_clicked(self):
+        """
+        Opens the data view window when the data view button is clicked.
+        """
+        self.datawindow = Data_View_Window()
+        
     def get_com_ports(self, silent=False):
         """
         Scans for available COM ports, updates the global `com_ports` dictionary, 
@@ -314,28 +378,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Functionality:
             - Uses `list_ports.comports()` to retrieve a list of available COM ports.
-            - Creates a temporary dictionary `temp_com_ports` to store the current ports.
-            - For each port, creates a `com_port` object and adds it to `temp_com_ports`.
-            - If `silent` is False, displays the list of found ports in the UI.
-            - Compares the new list of ports with the existing `com_ports` dictionary.
             - Updates the global `com_ports` dictionary and the UI dropdown only if the list of ports has changed.
             - Restores the previously selected port in the dropdown if it still exists.
-
-        Notes:
-            - The `com_ports` dictionary is a global variable storing available COM ports.
-            - The `com_port` class is used to encapsulate port details.
-            - The `UIString` attribute of `com_port` objects is used as a unique identifier for each port.
-
-        Example:
-            If 3 COM ports are found, the function will display a message like:
-            "Found 3 COM ports:
-            COM1 - Description<br>COM2 - Description<br>COM3 - Description<br>"
         """
         ports = list_ports.comports()
         temp_com_ports = {}
         portsfound = ""
         for port in ports:
             new_port = com_port(port)
+            # print(f"Device: {new_port.device}, Name: {new_port.name}, Description: {new_port.description}, "
+                  # f"HWID: {new_port.hwid}, VID: {new_port.vid}, PID: {new_port.pid}, "
+                  # f"Serial Number: {new_port.serial_number}, Location: {new_port.location}, "
+                  # f"Manufacturer: {new_port.manufacturer}, Product: {new_port.product}, "
+                  # f"Interface: {new_port.interface}")
             temp_com_ports[new_port.UIString] = new_port
             if not silent:
                 portsfound += f"{new_port.UIString}<br>"
@@ -345,8 +400,8 @@ class MainWindow(QtWidgets.QMainWindow):
             # Only update if the list of ports has changed
             com_ports.clear()
             com_ports.update(temp_com_ports)
-            print(f"temp_com_ports: {len(temp_com_ports)}")
-            print(f"com_ports: {len(com_ports)}")
+            # print(f"temp_com_ports: {len(temp_com_ports)}")
+            # print(f"com_ports: {len(com_ports)}")
             # Block signals to avoid triggering events during updates
             self.port_comboBox.blockSignals(True)
             temp_selected_port = self.port_comboBox.currentText()  # Store the current port text
@@ -359,9 +414,8 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.port_comboBox.setCurrentIndex(0)
             self.port_comboBox.blockSignals(False)
-            print(f"COM ports updated: {list(com_ports.keys())}")
+            # print(f"COM ports updated: {list(com_ports.keys())}")
             
-       
     def port_changed(self):
         """
         Updates AppConfig with the newly selected COM port index and saves settings.
@@ -370,9 +424,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         app_config.last_selected_port = self.port_comboBox.currentIndex()
         app_config.save_user_settings()
-        print(f"Port changed to: {self.port_comboBox.currentText()} (Index: {app_config.last_selected_port})")
+        # print(f"Port changed to: {self.port_comboBox.currentText()} (Index: {app_config.last_selected_port})")
 
-    # Disconnect from the serial port
     def disconnect_port(self):
         """
         Stops the serial reader thread and closes the serial port connection.
@@ -386,7 +439,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ser.close()
         self.output_UI_message("Disconnected from the serial port.")
 
-    # Refresh the list of COM ports
     def refresh_ports(self):
         """
         Refreshes the list of available COM ports in the dropdown.
@@ -401,10 +453,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.port_comboBox.clear()
         self.port_comboBox.addItems(com_ports.keys())
 
-    # Output a UI message
     def output_UI_message(self, message):
         """
         Displays a formatted UI message in the output text area and scrolls to the latest entry.
+
+        Args:
+            message (str): The message to display in the UI.
         """
         inChevons = "&gt;&gt;&gt;&gt;&gt;&gt;&gt;"
         outChevrons = "&lt;&lt;&lt;&lt;&lt;&lt;&lt;"
@@ -413,17 +467,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.output_text.append(ui_message)
         self.output_text.ensureCursorVisible()
 
-    # Output a message from the serial port
     def output_Port_message(self, message):
         """
         Displays a formatted message received from the serial port in the output text area and scrolls to the latest entry.
+
+        Args:
+            message (str): The message received from the serial port.
         """
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ui_message = f'<span style="color:blue;">[{timestamp}] - {message}</span>'
         self.output_text.append(ui_message)
         self.output_text.ensureCursorVisible()
 
-    # Connect to the selected serial port
     def connect_port(self):
         """
         Connects to the selected COM port and starts the serial reader thread.
@@ -445,7 +500,6 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.output_UI_message(f"Error connecting to {selected_port}: {str(e)}")
 
-    # Handle window close event saving user settings to settings.ini
     def closeEvent(self, event):
         """
         Handles the window close event.
@@ -454,7 +508,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         app_config.save_user_settings()
         self.disconnect_port()
-       
+        self.datawindow.close() if hasattr(self, 'datawindow') else None
 
 
 
