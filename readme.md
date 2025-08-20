@@ -48,7 +48,7 @@ A simple serial monitor intended for use with the Raspberry Pi Pico and Debug-pr
 
 The interface is defined in `MainForm.ui` and features:
 
-- A main window titled "Igg Serial Monitor"
+- A main window titled "Iggy Serial Monitor"
 - A combo box for COM port selection
 - A combo box for baud rate selection
 - A text area for displaying serial output
