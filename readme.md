@@ -81,7 +81,6 @@ serial_monitor_for_pico/
 ├── readme.md
 ├── requirements.txt
 ```
->>>>>>> Reorganise-the-structure-and-update-as-needed
 
 ## License
 
