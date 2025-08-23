@@ -11,14 +11,14 @@ class ComPort:
         device (str): The device path of the COM port (e.g., COM3).
         name (str): The name of the COM port.
         description (str): A brief description of the COM port.
-        hwid (str): The hardware ID of the COM port.
+        hwid (str): The hardware ID of the COM port (e.g., USB VID:PID=1234:5678).
         vid (int or None): The vendor ID of the COM port (if available).
         pid (int or None): The product ID of the COM port (if available).
         serial_number (str or None): The serial number of the COM port (if available).
-        location (str or None): The physical location of the COM port (if available).
-        manufacturer (str or None): The manufacturer of the COM port (if available).
-        product (str or None): The product name of the COM port (if available).
-        interface (str or None): The interface type of the COM port (if available).
+        location (str or None): The physical location of the COM port (e.g., port location on the device).
+        manufacturer (str or None): The manufacturer of the COM port (e.g., "FTDI").
+        product (str or None): The product name of the COM port (e.g., "USB Serial Port").
+        interface (str or None): The interface type of the COM port (e.g., "UART").
 
     Methods:
         UIString():
@@ -31,7 +31,22 @@ class ComPort:
         Args:
             comport: An object representing a COM port, typically obtained from `list_ports.comports()`.
 
-        Attributes are extracted from the `comport` object and assigned to the instance.
+        Workflow:
+            - Extracts attributes from the `comport` object and assigns them to the instance.
+            - Provides a structured representation of the COM port for use in the application.
+
+        Attributes:
+            device (str): The device path (e.g., COM3).
+            name (str): The name of the COM port.
+            description (str): A description of the COM port.
+            hwid (str): The hardware ID of the COM port.
+            vid (int or None): The vendor ID of the COM port.
+            pid (int or None): The product ID of the COM port.
+            serial_number (str or None): The serial number of the COM port.
+            location (str or None): The physical location of the COM port.
+            manufacturer (str or None): The manufacturer of the COM port.
+            product (str or None): The product name of the COM port.
+            interface (str or None): The interface type of the COM port.
         """
         self.device = comport.device  # The device path (e.g., COM3)
         self.name = comport.name  # The name of the COM port

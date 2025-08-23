@@ -4,19 +4,31 @@ from PyQt5 import QtWidgets, uic
 # Data View Window Class
 class DataViewWindow(QtWidgets.QMainWindow):
     """
-    DataViewWindow is a secondary GUI class for the serial monitor application. It provides
-    advanced data visualization capabilities for incoming serial data.
+    DataViewWindow Class
+
+    This class represents the secondary window for advanced data visualization in the serial monitor application. It provides functionality for viewing, saving, and interacting with tabular data.
 
     Attributes:
         shared_config (SharedConfig): Shared configuration object containing application-wide settings.
-        input_name_text (QtWidgets.QPlainTextEdit): Text area for entering a name or label for the data.
-        preview_txt_label (QtWidgets.QLabel): Label for previewing formatted text based on user input.
+        data_tableView (QtWidgets.QTableView): Table view for displaying tabular data.
+        auto_scroll_checkBox (QtWidgets.QCheckBox): Checkbox to enable or disable auto-scrolling.
+        save_data_pushButton (QtWidgets.QPushButton): Button to save the current data to a file.
 
     Methods:
-        __init__(shared_config):
-            Initializes the DataViewWindow, sets up the UI, and connects UI elements to their handlers.
-        validateNameText():
-            Validates the text entered in the input_name_text field and updates the preview label.
+        autoScroll():
+            Automatically scrolls the data_tableView to the bottom if auto-scroll is enabled.
+
+        disableAutoScroll():
+            Disables the auto-scroll checkbox when the scroll bar is manually triggered.
+
+        save_data_pushButton_clicked():
+            Handles the save data button click event and saves the current data in the table view to a file.
+
+        isScrolledToBottom():
+            Checks if the data_tableView is scrolled to the bottom.
+
+            Returns:
+                bool: True if the scroll bar is at the bottom, False otherwise.
     """
     def __init__(self, shared_config):
         """
@@ -137,9 +149,10 @@ class DataViewWindow(QtWidgets.QMainWindow):
         """
         self.shared_config.app_config.save_user_last_port_settings()
         
+
     def autoScroll(self):
         """
-        Automatically scrolls the data table view to the bottom.
+        Automatically scrolls the data_tableView to the bottom.
 
         This method is called when new data is added to ensure the latest data is visible.
         """
@@ -150,17 +163,19 @@ class DataViewWindow(QtWidgets.QMainWindow):
     def disableAutoScroll(self):
         """
         Disables the auto-scroll checkbox when the scroll bar is manually triggered.
+
+        If the scroll bar is not at the bottom, auto-scroll is disabled.
         """
         if not self.isScrolledToBottom():
             print("Scroll bar is at the bottom, enabling auto-scroll.")
             self.auto_scroll_checkBox.setChecked(False)
-        
 
     def save_data_pushButton_clicked(self):
         """
         Handles the save data button click event.
 
-        Saves the current data in the table view to a file.
+        Opens a file dialog to select the save location and saves the current data in the table view to a CSV file.
+        Displays a confirmation message upon successful save.
         """
         file_name, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
@@ -171,7 +186,7 @@ class DataViewWindow(QtWidgets.QMainWindow):
         if file_name:
             self.shared_config.tracked_data_table_model.saveDataToFile(file_name)
             QtWidgets.QMessageBox.information(self, "Save Data", f"Data saved to {file_name}")
-            
+
     def isScrolledToBottom(self):
         """
         Checks if the data_tableView is scrolled to the bottom.

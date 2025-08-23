@@ -5,28 +5,40 @@ from datetime import datetime
 # Serial Reader Thread Class
 class SerialReaderThread(threading.Thread):
     """
+    SerialReaderThread Class
+
     SerialReaderThread is a background thread responsible for reading data from a serial port
     and passing it to the main application for processing.
 
     Attributes:
         shared_config (SharedConfig): Shared configuration object containing application-wide settings.
-        ser (serial.Serial): Serial port object used for communication.
+        serial_port (serial.Serial): Serial port object used for communication.
         running (bool): Flag indicating whether the thread is actively reading data.
+        callback (function): A callback function to process data received from the serial port.
 
     Methods:
-        __init__(shared_config, ser):
-            Initializes the SerialReaderThread with the shared configuration and serial port object.
+        __init__(shared_config, serial_port, callback):
+            Initializes the SerialReaderThread with the shared configuration, serial port object, and callback function.
+
         run():
             Continuously reads data from the serial port while the thread is running.
+
         stop():
             Stops the thread by setting the running flag to False.
     """
     def __init__(self, shared_config, serial_port, callback):
         """
-        Initializes the SerialReaderThread with the shared configuration and serial port object.
+        Initializes the SerialReaderThread with the shared configuration, serial port object, and callback function.
 
-        - Stores the shared configuration and serial port object.
-        - Sets the running flag to True.
+        Args:
+            shared_config (SharedConfig): Shared configuration object containing application-wide settings.
+            serial_port (serial.Serial): Serial port object used for communication.
+            callback (function): A callback function to process data received from the serial port.
+
+        Workflow:
+            - Stores the shared configuration and serial port object.
+            - Sets the running flag to True to indicate the thread is active.
+            - Initializes the callback function for processing data.
         """
         super(SerialReaderThread, self).__init__()
         self.shared_config = shared_config
@@ -40,8 +52,14 @@ class SerialReaderThread(threading.Thread):
         """
         Continuously reads data from the serial port while the thread is running.
 
-        - Reads data from the serial port using the `readline` method.
-        - Passes the data to the shared configuration's queue or processing method.
+        Workflow:
+            - Reads data from the serial port using the `readline` method.
+            - Decodes the raw data using UTF-8 encoding.
+            - Passes the decoded data to the callback function or shared configuration for processing.
+
+        Notes:
+            - Handles exceptions gracefully to ensure the thread does not crash unexpectedly.
+            - Stops reading if the serial port is closed or the `running` flag is set to False.
         """
         while self.running and self.serial_port.is_open:
             try:
@@ -104,7 +122,3 @@ class SerialReaderThread(threading.Thread):
                         
                     # Update the tracked data table model
                     self.shared_config.tracked_data_table_model.addRow(found_timestamp, found_data_name, found_data_point)
-                
-    
-            
-

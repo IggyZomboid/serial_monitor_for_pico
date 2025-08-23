@@ -2,43 +2,128 @@ from PyQt5.QtCore import QAbstractTableModel, Qt, QModelIndex, QPersistentModelI
 import csv
 
 class tracked_data_table_model(QAbstractTableModel):
-    def __init__(self):
-        super(tracked_data_table_model, self).__init__()
-        self.data = []
-        self.headers = []  # Initial headers
-        self.addHeader("Timestamp")  # Add a default header for timestamps
+    """
+    A custom table model for tracking and displaying data points in a tabular format.
 
-        self.view = None # a placeholder for the view that will use this model and will be used to call back
+    This model is designed to work with a QTableView and provides functionality for dynamically
+    adding headers, rows, and updating data. It also supports saving the data to a CSV file.
+
+    Attributes:
+        data (list): A list of lists representing the rows and columns of the table.
+        headers (list): A list of strings representing the column headers.
+        view (QTableView or None): A reference to the view using this model, allowing callbacks.
+
+    Methods:
+        setView(view):
+            Sets the view that will use this model.
+
+        rowCount(parent=None):
+            Returns the number of rows in the model.
+
+        columnCount(parent=None):
+            Returns the number of columns in the model.
+
+        data(index, role=Qt.DisplayRole):
+            Returns the data for a specific cell in the model.
+
+        headerData(section, orientation, role=Qt.DisplayRole):
+            Returns the header data for a specific row or column.
+
+        addHeader(new_header):
+            Dynamically adds a new header and updates the model.
+    """
+    def __init__(self):
+        """
+        Initializes the tracked_data_table_model instance.
+
+        - Sets up an empty data structure for rows and columns.
+        - Adds a default header for timestamps.
+        """
+        super(tracked_data_table_model, self).__init__()
+        self.data = []  # Initialize an empty list for rows
+        self.headers = []  # Initialize an empty list for column headers
+        self.addHeader("Timestamp")  # Add a default header for timestamps
+        self.view = None  # Placeholder for the view using this model
 
     def setView(self, view):
         """
         Sets the view that will use this model.
-        This allows the model to notify the view about changes.
+
+        Args:
+            view (QTableView): The view that will use this model.
+
+        This allows the model to notify the view about changes, such as auto-scrolling.
         """
         self.view = view
 
     def rowCount(self, parent=None):
+        """
+        Returns the number of rows in the model.
+
+        Args:
+            parent (QModelIndex or None): Required by PyQt5 but not used here.
+
+        Returns:
+            int: The number of rows in the data.
+        """
         return len(self.data)
 
     def columnCount(self, parent=None):
-        return len(self.headers)  # Number of headers determines column count
+        """
+        Returns the number of columns in the model.
+
+        Args:
+            parent (QModelIndex or None): Required by PyQt5 but not used here.
+
+        Returns:
+            int: The number of columns in the headers.
+        """
+        return len(self.headers)
 
     def data(self, index, role=Qt.DisplayRole):
+        """
+        Returns the data for a specific cell in the model.
+
+        Args:
+            index (QModelIndex): The index of the cell.
+            role (int): The role for which data is requested (e.g., display role).
+
+        Returns:
+            Any: The data for the cell, or None if the role is not Qt.DisplayRole.
+        """
         if role == Qt.DisplayRole:
             return self.data[index.row()][index.column()]
         return None
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
+        """
+        Returns the header data for a specific row or column.
+
+        Args:
+            section (int): The index of the row or column.
+            orientation (Qt.Orientation): The orientation (horizontal or vertical).
+            role (int): The role for which data is requested (e.g., display role).
+
+        Returns:
+            str: The header data for the specified section and orientation.
+        """
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
-                return self.headers[section]  # Return dynamic headers
+                return self.headers[section]  # Return column headers
             else:
-                return f"Row {section + 1}"
+                return f"Row {section + 1}"  # Return row numbers as strings
         return None
 
     def addHeader(self, new_header):
         """
         Dynamically adds a new header and updates the model.
+
+        Args:
+            new_header (str): The name of the new header to add.
+
+        - Appends the new header to the headers list.
+        - Updates existing rows to include the new column.
+        - Emits signals to notify the view about the change.
         """
         print(f"Adding new header: {new_header}")
         try:

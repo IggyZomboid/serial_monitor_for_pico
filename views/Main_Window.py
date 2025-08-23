@@ -9,43 +9,47 @@ from .Data_View_Window import DataViewWindow
 # Main Window Class
 class MainWindow(QtWidgets.QMainWindow):
     """
-    MainWindow is the primary GUI class for the serial monitor application. It provides
-    an interface for interacting with serial ports, including connecting, disconnecting,
-    refreshing available ports, and displaying messages from the serial port.
+    MainWindow Class
+
+    This class represents the main window of the serial monitor application. It initializes the UI, sets up event handlers, and manages the application's main functionality.
 
     Attributes:
         shared_config (SharedConfig): Shared configuration object containing application-wide settings.
+        serial_thread (Thread): Placeholder for the serial reader thread.
         port_comboBox (QtWidgets.QComboBox): Dropdown for selecting available COM ports.
         connect_button (QtWidgets.QPushButton): Button to connect to the selected COM port.
         refresh_ports_Button (QtWidgets.QPushButton): Button to refresh the list of available COM ports.
         clear_button (QtWidgets.QPushButton): Button to clear the output text area.
         data_view_button (QtWidgets.QPushButton): Button to open the data view window.
         output_text (QtWidgets.QTextEdit): Text area for displaying messages and logs.
-        ser (serial.Serial or None): Serial port object for communication.
-        serial_thread (SerialReaderThread or None): Thread for reading data from the serial port.
         timer (QtCore.QTimer): Timer to periodically check for available COM ports.
 
     Methods:
         __init__(shared_config):
             Initializes the MainWindow, sets up the UI, and connects button actions to their handlers.
-        data_view_button_clicked():
-            Opens the data view window when the data view button is clicked.
-        get_com_ports(silent=False):
-            Scans for available COM ports and updates the dropdown list.
+
+            - Loads the UI from the 'MainForm.ui' file.
+            - Retrieves and initializes UI elements such as buttons, combo boxes, and text areas.
+            - Sets up event handlers for button clicks and combo box changes.
+            - Starts a timer to periodically check for available COM ports.
+
         port_changed():
-            Handles the event when the selected port in the combo box changes and updates the configuration.
-        disconnect_port():
-            Disconnects from the currently connected serial port, if any, and stops the serial reader thread.
+            Updates the shared configuration when the selected port changes.
+
         refresh_ports():
-            Refreshes the list of available COM ports and disconnects from the current port if connected.
-        output_UI_message(message):
-            Displays a formatted UI message in the output text area.
-        output_Port_message(message):
-            Displays a formatted message received from the serial port in the output text area.
+            Refreshes the list of available COM ports in the dropdown.
+
         connect_port():
-            Connects to the selected COM port and starts the serial reader thread.
-        closeEvent(event):
-            Handles the window close event to save user settings and disconnect from the serial port.
+            Connects to the selected COM port.
+
+        output_text.clear():
+            Clears the output text area.
+
+        data_view_button_clicked():
+            Opens the data view window.
+
+        get_com_ports(force_refresh=False):
+            Retrieves the list of available COM ports. If force_refresh is True, refreshes the list.
     """
     def __init__(self, shared_config):
         """
@@ -60,34 +64,37 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi('UI/MainForm.ui', self)
         font = QtGui.QFont("Arial", 10)
 
+        # Initialize shared configuration and serial thread
         self.shared_config = shared_config
         self.serial_thread = None  # Placeholder for the serial reader thread
+
+        # Retrieve available COM ports
         self.get_com_ports()
-        # Get all UI elements
+
+        # Initialize UI elements
         self.port_comboBox = self.findChild(QtWidgets.QComboBox, 'port_comboBox')  
         # Set the combo box to the last selected port or default to the first item
         if self.port_comboBox.count() > self.shared_config.last_selected_port:
             self.port_comboBox.setCurrentIndex(self.shared_config.last_selected_port)
         else:
             self.port_comboBox.setCurrentIndex(0)
-        
+
         self.connect_button = self.findChild(QtWidgets.QPushButton, 'connect_button')
         self.refresh_ports_Button = self.findChild(QtWidgets.QPushButton, 'refresh_ports_Button')
         self.clear_button = self.findChild(QtWidgets.QPushButton, 'clear_button')
         self.data_view_button = self.findChild(QtWidgets.QPushButton, 'data_view_button')
         self.output_text = self.findChild(QtWidgets.QTextEdit, 'output_text')
 
+        # Set font for the output text area
         self.output_text.setFont(font)
-        
-        # Update UserConfig fields when values change
-        self.port_comboBox.currentIndexChanged.connect(self.port_changed)
 
-        # Connect buttons to their handlers
+        # Connect signals to their handlers
+        self.port_comboBox.currentIndexChanged.connect(self.port_changed)
         self.refresh_ports_Button.clicked.connect(self.refresh_ports)
         self.connect_button.clicked.connect(self.connect_port)
         self.clear_button.clicked.connect(self.output_text.clear)  # Clear output text area
         self.data_view_button.clicked.connect(self.data_view_button_clicked)  # Open data view window
-        
+
         # Serial port placeholder
         self.ser = None
 

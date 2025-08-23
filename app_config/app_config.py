@@ -62,12 +62,15 @@ class UserConfig:
         self.config['user_settings']['data_point_names'] = ','.join(self.shared_config.dataPointNames)
         # Debug print to verify the values being saved
         print("Config to save:", dict(self.config['user_settings']))
+        # Print the user settings that are about to be saved for debugging purposes.
 
         # Write the settings to the file
         with open('settings.ini', 'w') as configfile:
             self.config.write(configfile)
+        # Save the configuration settings to the 'settings.ini' file.
 
-        print("Settings saved!") 
+        print("Settings saved!")
+        # Print a confirmation message indicating that the settings have been successfully saved.
     
     def save_data_point_names_settings(self):
         """
@@ -85,10 +88,12 @@ class UserConfig:
         self.config['user_settings']['data_point_names'] = ','.join(self.shared_config.dataPointNames)
         # Debug print to verify the values being saved
         print("Config to save:", dict(self.config['user_settings']))
+        # Print the user settings that are about to be saved for debugging purposes.
 
         # Write the settings to the file
         with open('settings.ini', 'w') as configfile:
             self.config.write(configfile)
+        # Save the configuration settings to the 'settings.ini' file.
 
-        print("Settings saved!") 
-    
+        print("Settings saved!")
+        # Print a confirmation message indicating that the settings have been successfully saved.
