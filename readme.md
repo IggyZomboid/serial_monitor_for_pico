@@ -50,29 +50,31 @@ A simple serial monitor designed for use with the Raspberry Pi Pico and Debug-pr
 
 ## Project Structure
 
+The project structure is as follows:
+
 ```md
 serial_monitor_for_pico/
 ├── app_config/
-│   ├── [__init__.py](http://_vscodecontentref_/0)
-│   ├── [app_config.py](http://_vscodecontentref_/1)
+│   ├── __init__.py
+│   ├── app_config.py
 ├── com_port/
-│   ├── [__init__.py](http://_vscodecontentref_/2)
-│   ├── [com_port.py](http://_vscodecontentref_/3)
+│   ├── __init__.py
+│   ├── com_port.py
 ├── serial_reader/
-│   ├── [__init__.py](http://_vscodecontentref_/4)
-│   ├── [SerialReaderThread.py](http://_vscodecontentref_/5)
+│   ├── __init__.py
+│   ├── SerialReaderThread.py
 ├── views/
-│   ├── [__init__.py](http://_vscodecontentref_/6)
-│   ├── [Data_View_Window.py](http://_vscodecontentref_/7)
-│   ├── [Main_Window.py](http://_vscodecontentref_/8)
+│   ├── __init__.py
+│   ├── Data_View_Window.py
+│   ├── Main_Window.py
 ├── UI/
-│   ├── [Data_view_window.ui](http://_vscodecontentref_/9)
-│   ├── [MainForm.ui](http://_vscodecontentref_/10)
-├── [settings.ini](http://_vscodecontentref_/11)
+│   ├── Data_view_window.ui
+│   ├── MainForm.ui
+├── settings.ini
 ├── LICENSE
-├── [main.py](http://_vscodecontentref_/12)
-├── [readme.md](http://_vscodecontentref_/13)
-├── [requirements.txt](http://_vscodecontentref_/14)
+├── main.py
+├── readme.md
+├── requirements.txt
 ```
 
 ## Interface
