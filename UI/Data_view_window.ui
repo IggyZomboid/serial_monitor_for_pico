@@ -48,11 +48,14 @@
       <height>761</height>
      </rect>
     </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
     <widget class="QWidget" name="RegisterDataPoints">
      <attribute name="title">
       <string>Register Data Points</string>
      </attribute>
-     <widget class="QListWidget" name="listWidget">
+     <widget class="QListWidget" name="dataPointName_listWidget">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -85,19 +88,6 @@
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="delete_name_button">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>510</y>
-        <width>371</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Delete data point</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
@@ -124,11 +114,34 @@
        <string/>
       </property>
      </widget>
+     <widget class="QPushButton" name="clear_names_button">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>510</y>
+        <width>371</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Clear List</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="Table_View_Tab">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>Table View</string>
      </attribute>
+     <widget class="QTableView" name="data_tableView">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>1161</width>
+        <height>711</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

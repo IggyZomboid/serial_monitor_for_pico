@@ -1,7 +1,8 @@
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from app_config import UserConfig
 from views.Main_Window import MainWindow
+from table_model.table_model import tracked_data_table_model
 
 # Shared Configuration Class
 class SharedConfig:
@@ -20,9 +21,12 @@ class SharedConfig:
     """
     def __init__(self):
         self.BAUD_RATE = 115200  # Default baud rate
-        self.date_queue_dict = {}  # Dictionary for timestamped serial data
-        self.app_config = UserConfig()  # User configuration instance
+        self.date_queue_dict = {}  # Dictionary for timestamped serial data        
         self.com_ports = {}  # Dictionary for available COM ports
+        self.dataPointNames = []  # List to store names of data points
+        self.last_selected_port = 0  # Last selected COM port index
+        self.app_config = UserConfig(self)  # User configuration instance
+        self.tracked_data_table_model = tracked_data_table_model()
 
 # Create a shared configuration instance
 shared_config = SharedConfig()

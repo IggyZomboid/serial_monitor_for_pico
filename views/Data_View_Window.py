@@ -34,11 +34,39 @@ class DataViewWindow(QtWidgets.QMainWindow):
         # Get UI elements
         self.input_name_text = self.findChild(QtWidgets.QPlainTextEdit, 'input_name_text')
         self.preview_txt_label = self.findChild(QtWidgets.QLabel, 'preview_txt_label')
-        self.input_name_text.textChanged.connect(self.validateNameText)
+        self.dataPointName_listWidget = self.findChild(QtWidgets.QListWidget, 'dataPointName_listWidget')
+        self.clear_names_button = self.findChild(QtWidgets.QPushButton, 'clear_names_button')
         self.add_name_button = self.findChild(QtWidgets.QPushButton, 'add_name_button')
-        self.add_name_button.clicked.connect(self.addDataPoint)
-        self.show()
+        self.data_tableView = self.findChild(QtWidgets.QTableView, 'data_tableView')
+        self.input_name_text.textChanged.connect(self.validateNameText)
+        self.add_name_button.clicked.connect(self.addDataPointName)
+        self.dataPointName_listWidget.clicked.connect(
+            lambda: self.clickToDeleteDatapointName(self.dataPointName_listWidget.currentItem())
+        )
+        self.clear_names_button.clicked.connect(self.clearDataPointNames)
+        self.data_tableView.setModel(self.shared_config.tracked_data_table_model)
 
+        self.show()
+        
+        self.resetDataPointNames()
+
+    def clickToDeleteDatapointName(self, item):
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Confirm Deletion",
+            f"Are you sure you want to delete '{item.text()}'?",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+        )
+        if reply == QtWidgets.QMessageBox.Yes:
+            if item.text() in self.shared_config.dataPointNames:
+                removedItem = item.text()
+                self.shared_config.dataPointNames.remove(removedItem)
+                self.resetDataPointNames()
+                # if item.text() is a key in date_queue_dict, remove it
+                if removedItem in self.shared_config.date_queue_dict:
+                    print(f"Removing '{removedItem}' from date_queue_dict")
+                    del self.shared_config.date_queue_dict[removedItem]
+            
     def validateNameText(self):
         """
         Validates the text entered in the input_name_text field and updates the preview label.
@@ -46,36 +74,57 @@ class DataViewWindow(QtWidgets.QMainWindow):
         - Ensures the text is not empty.
         - Updates the preview_txt_label with the formatted text.
         """
-        print("Validating input name text...")
-        print(f"Current text: {self.input_name_text.toPlainText()}")
-        if not self.input_name_text.toPlainText():
-            print("Input name text is empty, setting to 'Default Name'.")
-            self.input_name_text.setPlainText('Default Name')
-        else:
-            print("Input name text is not empty, proceeding with sanitization.")
         # Replace spaces with underscores first
         self.sanitized_text = self.input_name_text.toPlainText().replace(' ', '_')
-        print("Replacing spaces with underscores in input name text...")
         
         # Remove any character that is not alphanumeric, underscore, or hyphen
         self.sanitized_text = re.sub(r'[^a-zA-Z0-9_-]', '', self.sanitized_text)
-        if self.sanitized_text != self.input_name_text.toPlainText():
-            print(f"Sanitized text: {self.sanitized_text}")
-        
         self.preview_txt_label.setText(self.sanitized_text)
         
-        print(self.sanitized_text)
-    
-    def addDataPoint(self):
-        
-        if not self.sanitized_text:
-            print("No valid data point name provided.")
+    def addDataPointName(self):
+        """
+        Adds a new data point name to the list of data points.
+
+        Args:
+            data_point_name (str): The name of the data point to be added.
+        """
+        if self.sanitized_text not in self.shared_config.dataPointNames:
+            self.shared_config.dataPointNames.append(self.sanitized_text)
+            self.resetDataPointNames()
+            self.input_name_text.clear()
+            self.preview_txt_label.clear()
+            self.sanitized_text = ''
+        elif self.sanitized_text != '':
             QtWidgets.QMessageBox.warning(
                 self,
                 "Invalid Data Point",
-                "Please provide a valid name for the data point before proceeding."
+                f"Data point '{self.sanitized_text}' already exists."
             )
-            return
-        else:
-            print(f"Adding data point: {self.sanitized_text}")
-            
+   
+    def clearDataPointNames(self):
+        """
+        Clears all data point names from the list.
+        """
+        self.shared_config.dataPointNames.clear()
+        self.dataPointName_listWidget.clear()
+                
+    def resetDataPointNames(self):
+        """
+        Resets the list of data point names to an empty state.
+
+        Returns:
+            str: A message indicating that the data points have been reset.
+        """
+        self.dataPointName_listWidget.clear()
+        count = len(self.shared_config.dataPointNames)
+        if count != 0:
+            self.dataPointName_listWidget.addItems(self.shared_config.dataPointNames)
+        
+    def closeEvent(self, event):
+        """
+        Handles the window close event.
+
+        Saves user settings and disconnects from the serial port before exiting.
+        """
+        self.shared_config.app_config.save_user_last_port_settings()
+        

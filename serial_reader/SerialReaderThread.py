@@ -33,9 +33,7 @@ class SerialReaderThread(threading.Thread):
         self.serial_port = serial_port
         self.running = True
         self.callback = callback  # Callback function to process data if needed
-        
-        self.dataPointNames = []
-        
+                
         print(f"SerialReaderThread initialized with serial port: {self.serial_port.portstr}")
 
     def run(self):
@@ -62,6 +60,9 @@ class SerialReaderThread(threading.Thread):
                 # If the line is not empty, pass it to the callback function
                 if line:
                     self.callback(f"{line}")  # Send the decoded line to the callback
+                    # Record the data point with a timestamp
+                    self.record_data_points(line)  # Record the data point with a timestamp
+                    
             except Exception as e:
                 # If an error occurs, send the error message to the callback
                 self.callback(f"Error: {str(e)}")
@@ -75,47 +76,35 @@ class SerialReaderThread(threading.Thread):
         """
         self.running = False
     
-    
-    def addDataPointName(self, data_point_name):
+    def record_data_points(self, line):
         """
-        Adds a new data point name to the list of data points.
+        Records data points with a timestamp.
 
-        Args:
-            data_point_name (str): The name of the data point to be added.
+        - Appends the data to the shared configuration's date_queue_dict with the current timestamp.
         """
-        if data_point_name not in self.dataPointNames:
-            self.dataPointNames.append(data_point_name)
-            return True, f"Data point '{data_point_name}' added."
-        else:
-            return False, f"Data point '{data_point_name}' already exists."
+        # Only record if there are data point names available
+        if len(self.shared_config.dataPointNames) != 0:
+            #check if line contians a comma
+            if ',' in line:
+                data = line.split(',')
+                if data[0] in self.shared_config.dataPointNames:
+                    found_data_name = data[0]
+                    found_data_point = data[1]
+                    found_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                    
+                    print(f"Recording data point: {found_data_name} with value: {found_data_point} at {found_timestamp}")
+                    
+                    datapoint = {found_data_point, found_timestamp}
+                    
+                    #if date_queue_dict contains found_data_name as key then update add the datapoint to its' list
+                    if found_data_name in self.shared_config.date_queue_dict:
+                        self.shared_config.date_queue_dict[found_data_name].append(datapoint)
+                    else:
+                        self.shared_config.date_queue_dict[found_data_name] = [datapoint]
+                        
+                    # Update the tracked data table model
+                    self.shared_config.tracked_data_table_model.addRow(found_timestamp, found_data_name, found_data_point)
+                
     
-    def removeDataPointName(self, data_point_name):
-        """
-        Removes a data point name from the list of data points.
+            
 
-        Args:
-            data_point_name (str): The name of the data point to be removed.
-        """
-        if data_point_name in self.dataPointNames:
-            self.dataPointNames.remove(data_point_name)
-            return True, f"Data point '{data_point_name}' removed."
-        else:
-            return False, f"Data point '{data_point_name}' does not exist."
-    
-    def clearDataPointNames(self):
-        """
-        Clears all data point names from the list.
-        """
-        self.dataPointNames.clear()
-        return "All data points cleared."
-    
-    def getDataPointNames(self):
-        """
-        Returns the list of data point names.
-
-        Returns:
-            list: A list of data point names.
-        """
-        if not self.dataPointNames:
-            return False, []
-        return True, self.dataPointNames

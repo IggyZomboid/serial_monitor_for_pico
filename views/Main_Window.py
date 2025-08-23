@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5 import QtWidgets, uic, QtCore, QtGui
 import serial
 from serial.tools import list_ports
 from datetime import datetime
@@ -59,15 +59,16 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         super(MainWindow, self).__init__()
         uic.loadUi('UI/MainForm.ui', self)
+        font = QtGui.QFont("Arial", 10)
+
         self.shared_config = shared_config
         self.serial_thread = None  # Placeholder for the serial reader thread
         self.get_com_ports()
         # Get all UI elements
         self.port_comboBox = self.findChild(QtWidgets.QComboBox, 'port_comboBox')  
-        # print(f"app_config.last_selected_port: {app_config.last_selected_port}")
         # Set the combo box to the last selected port or default to the first item
-        if self.port_comboBox.count() > self.shared_config.app_config.last_selected_port:
-            self.port_comboBox.setCurrentIndex(self.shared_config.app_config.last_selected_port)
+        if self.port_comboBox.count() > self.shared_config.last_selected_port:
+            self.port_comboBox.setCurrentIndex(self.shared_config.last_selected_port)
         else:
             self.port_comboBox.setCurrentIndex(0)
         
@@ -76,6 +77,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clear_button = self.findChild(QtWidgets.QPushButton, 'clear_button')
         self.data_view_button = self.findChild(QtWidgets.QPushButton, 'data_view_button')
         self.output_text = self.findChild(QtWidgets.QTextEdit, 'output_text')
+        self.output_text.setFont(font)
         
         # Update UserConfig fields when values change
         self.port_comboBox.currentIndexChanged.connect(self.port_changed)
@@ -120,13 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
         portsfound = ""
         for port in ports:
             new_port = ComPort(port)
-            # print(f"Device: {new_port.device}, Name: {new_port.name}, Description: {new_port.description}, "
-                  # f"HWID: {new_port.hwid}, VID: {new_port.vid}, PID: {new_port.pid}, "
-                  # f"Serial Number: {new_port.serial_number}, Location: {new_port.location}, "
-                  # f"Manufacturer: {new_port.manufacturer}, Product: {new_port.product}, "
-                  # f"Interface: {new_port.interface}")
             temp_com_ports[new_port.UIString] = new_port
-            print(f"Temp Port: {new_port.UIString}")
             if not silent:
                 portsfound += f"{new_port.UIString}<br>"
         if not silent:
@@ -136,8 +132,6 @@ class MainWindow(QtWidgets.QMainWindow):
             # Only update if the list of ports has changed
             self.shared_config.com_ports.clear()
             self.shared_config.com_ports.update(temp_com_ports)
-            # print(f"temp_com_ports: {len(temp_com_ports)}")
-            # print(f"com_ports: {len(com_ports)}")
             # Block signals to avoid triggering events during updates
             self.port_comboBox.blockSignals(True)
             temp_selected_port = self.port_comboBox.currentText()  # Store the current port text
@@ -150,7 +144,6 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.port_comboBox.setCurrentIndex(0)
             self.port_comboBox.blockSignals(False)
-            # print(f"COM ports updated: {list(com_ports.keys())}")
             
     def port_changed(self):
         """
@@ -159,9 +152,8 @@ class MainWindow(QtWidgets.QMainWindow):
         Triggered when the user selects a different COM port from the dropdown.
         """
 
-        self.shared_config.app_config.last_selected_port = self.port_comboBox.currentIndex()
-        self.shared_config.app_config.save_user_settings()
-        # print(f"Port changed to: {self.port_comboBox.currentText()} (Index: {app_config.last_selected_port})")
+        self.shared_config.last_selected_port = self.port_comboBox.currentIndex()
+        self.shared_config.app_config.save_user_last_port_settings()
 
     def disconnect_port(self):
         """
@@ -169,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Also displays a message in the UI.
         """
-        if hasattr(self, 'serial_thread') and self.serial_thread.is_alive():
+        if self.serial_thread and self.serial_thread.is_alive():
             self.serial_thread.stop()
             self.serial_thread.join()
         if self.ser and self.ser.is_open:
@@ -200,6 +192,7 @@ class MainWindow(QtWidgets.QMainWindow):
         inChevons = "&gt;&gt;&gt;&gt;&gt;&gt;&gt;"
         outChevrons = "&lt;&lt;&lt;&lt;&lt;&lt;&lt;"
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        print(f"[{timestamp}]")  # Print to console for debugging
         ui_message = f'<span style="color:green;">[{timestamp}] - {inChevons} UI Message Start {outChevrons} <br>{message}<br>{inChevons} UI Message End {outChevrons}</span>'
         self.output_text.append(ui_message)
         self.output_text.ensureCursorVisible()
@@ -223,11 +216,9 @@ class MainWindow(QtWidgets.QMainWindow):
         Displays connection status or error messages in the UI.
         """
         selected_port = self.port_comboBox.currentText()
-        print(f"Selected Port: {selected_port}")
         port_info = self.shared_config.com_ports.get(selected_port, None)
 
         if port_info:
-            print(f"Selected Port XXXXXXXXX: {selected_port}")
             self.output_UI_message(f"Port Info:\nDevice: {port_info.device}\nName: {port_info.name}\nDescription: {port_info.description}\n"
                        f"HWID: {port_info.hwid}\nVID: {port_info.vid}\nPID: {port_info.pid}\nSerial Number: {port_info.serial_number}\n"
                        f"Location: {port_info.location}\nManufacturer: {port_info.manufacturer}\nProduct: {port_info.product}\n"
@@ -240,7 +231,6 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.ser = serial.Serial(port_info.name, baudrate=self.shared_config.BAUD_RATE, timeout=1)
             self.output_UI_message(f"Connected to {selected_port} at {self.shared_config.BAUD_RATE} baud.")
-            print(f"Connected to {selected_port} at {self.output_Port_message} baud.")
             self.serial_thread = SerialReaderThread(self.shared_config, self.ser, self.output_Port_message)
             self.serial_thread.start()
         except Exception as e:
@@ -252,6 +242,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         Saves user settings and disconnects from the serial port before exiting.
         """
-        self.shared_config.app_config.save_user_settings()
+        self.shared_config.app_config.save_user_last_port_settings()
         self.disconnect_port()
         self.datawindow.close() if hasattr(self, 'datawindow') else None
