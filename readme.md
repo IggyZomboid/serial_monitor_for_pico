@@ -30,6 +30,8 @@ A simple serial monitor designed for use with the Raspberry Pi Pico and Debug-pr
 2. Install dependencies:
 
     ```sh
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
     pip install -r requirements.txt
     ```
 
@@ -44,11 +46,37 @@ A simple serial monitor designed for use with the Raspberry Pi Pico and Debug-pr
 2. Select the desired COM port and baud rate.
 3. Click "Connect" to start monitoring serial data from your Raspberry Pi Pico.
 4. Use "Refresh" to update the list of available COM ports.
-5. Click "Data View" to open the advanced data view window.
+5. Click "Data View" to open the advanced data view window, where you can register data points and visualize tabular data.
 
 ## Project Structure
 
-<<<<<<< HEAD
+```md
+serial_monitor_for_pico/
+├── app_config/
+│   ├── [__init__.py](http://_vscodecontentref_/0)
+│   ├── [app_config.py](http://_vscodecontentref_/1)
+├── com_port/
+│   ├── [__init__.py](http://_vscodecontentref_/2)
+│   ├── [com_port.py](http://_vscodecontentref_/3)
+├── serial_reader/
+│   ├── [__init__.py](http://_vscodecontentref_/4)
+│   ├── [SerialReaderThread.py](http://_vscodecontentref_/5)
+├── views/
+│   ├── [__init__.py](http://_vscodecontentref_/6)
+│   ├── [Data_View_Window.py](http://_vscodecontentref_/7)
+│   ├── [Main_Window.py](http://_vscodecontentref_/8)
+├── UI/
+│   ├── [Data_view_window.ui](http://_vscodecontentref_/9)
+│   ├── [MainForm.ui](http://_vscodecontentref_/10)
+├── [settings.ini](http://_vscodecontentref_/11)
+├── LICENSE
+├── [main.py](http://_vscodecontentref_/12)
+├── [readme.md](http://_vscodecontentref_/13)
+├── [requirements.txt](http://_vscodecontentref_/14)
+```
+
+## Interface
+
 The interface is defined in `MainForm.ui` and features:
 
 - A main window titled "Iggy Serial Monitor"
@@ -56,31 +84,6 @@ The interface is defined in `MainForm.ui` and features:
 - A combo box for baud rate selection
 - A text area for displaying serial output
 - Buttons for connecting, refreshing ports, and clearing output
-=======
-```md
-serial_monitor_for_pico/
-├── app_config/
-│   ├── __init__.py
-│   ├── app_config.py
-├── com_port/
-│   ├── __init__.py
-│   ├── com_port.py
-├── serial_reader/
-│   ├── __init__.py
-│   ├── SerialReaderThread.py
-├── views/
-│   ├── __init__.py
-│   ├── Data_View_Window.py
-│   ├── Main_Window.py
-├── UI/
-│   ├── Data_view_window.ui
-│   ├── MainForm.ui
-├── settings.ini
-├── LICENSE
-├── main.py
-├── readme.md
-├── requirements.txt
-```
 
 ## License
 
@@ -89,3 +92,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Author
 
 Iggy Zomboid
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Submit a pull request with a clear description of your changes.
