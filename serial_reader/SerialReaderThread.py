@@ -21,7 +21,7 @@ class SerialReaderThread(threading.Thread):
         stop():
             Stops the thread by setting the running flag to False.
     """
-    def __init__(self, shared_config, ser):
+    def __init__(self, shared_config, serial_port, callback):
         """
         Initializes the SerialReaderThread with the shared configuration and serial port object.
 
@@ -30,8 +30,13 @@ class SerialReaderThread(threading.Thread):
         """
         super(SerialReaderThread, self).__init__()
         self.shared_config = shared_config
-        self.ser = ser
+        self.serial_port = serial_port
         self.running = True
+        self.callback = callback  # Callback function to process data if needed
+        
+        self.dataPointNames = []
+        
+        print(f"SerialReaderThread initialized with serial port: {self.serial_port.portstr}")
 
     def run(self):
         """
@@ -40,13 +45,27 @@ class SerialReaderThread(threading.Thread):
         - Reads data from the serial port using the `readline` method.
         - Passes the data to the shared configuration's queue or processing method.
         """
-        while self.running:
+        while self.running and self.serial_port.is_open:
             try:
-                line = self.ser.readline().decode('utf-8').strip()
-                # Example: Add the line to a shared queue for processing
-                self.shared_config.date_queue_dict[datetime.now()] = line
+                # Read a line of data from the serial port
+                raw_line = self.serial_port.readline()
+
+                # Attempt to decode the data using UTF-8 encoding
+                try:
+                    line = raw_line.decode('utf-8').strip()  # Decode using UTF-8
+                    encoding = 'utf-8'
+                except UnicodeDecodeError:
+                    # If UTF-8 decoding fails, fall back to ASCII encoding
+                    line = raw_line.decode('ascii', errors='ignore').strip()
+                    encoding = 'ascii'
+
+                # If the line is not empty, pass it to the callback function
+                if line:
+                    self.callback(f"{line}")  # Send the decoded line to the callback
             except Exception as e:
-                print(f"Error reading from serial port: {e}")
+                # If an error occurs, send the error message to the callback
+                self.callback(f"Error: {str(e)}")
+                break  # Exit the loop on error
 
     def stop(self):
         """
@@ -55,3 +74,48 @@ class SerialReaderThread(threading.Thread):
         - Ensures the thread exits gracefully.
         """
         self.running = False
+    
+    
+    def addDataPointName(self, data_point_name):
+        """
+        Adds a new data point name to the list of data points.
+
+        Args:
+            data_point_name (str): The name of the data point to be added.
+        """
+        if data_point_name not in self.dataPointNames:
+            self.dataPointNames.append(data_point_name)
+            return True, f"Data point '{data_point_name}' added."
+        else:
+            return False, f"Data point '{data_point_name}' already exists."
+    
+    def removeDataPointName(self, data_point_name):
+        """
+        Removes a data point name from the list of data points.
+
+        Args:
+            data_point_name (str): The name of the data point to be removed.
+        """
+        if data_point_name in self.dataPointNames:
+            self.dataPointNames.remove(data_point_name)
+            return True, f"Data point '{data_point_name}' removed."
+        else:
+            return False, f"Data point '{data_point_name}' does not exist."
+    
+    def clearDataPointNames(self):
+        """
+        Clears all data point names from the list.
+        """
+        self.dataPointNames.clear()
+        return "All data points cleared."
+    
+    def getDataPointNames(self):
+        """
+        Returns the list of data point names.
+
+        Returns:
+            list: A list of data point names.
+        """
+        if not self.dataPointNames:
+            return False, []
+        return True, self.dataPointNames

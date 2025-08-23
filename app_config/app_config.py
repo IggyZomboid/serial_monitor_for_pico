@@ -4,71 +4,64 @@ import configparser
 # User Configuration Class
 class UserConfig:
     """
-    UserConfig is a class that manages user-specific settings for the serial monitor application.
+    A class to manage application configuration and user settings.
 
-    This class provides functionality to store, retrieve, and update user settings such as the last selected
-    COM port, baud rate, and other preferences. It interacts with a configuration file to persist these settings
-    across sessions.
+    This class uses the `configparser` module to read and write user settings
+    to a configuration file named 'settings.ini'. It provides functionality
+    to load settings on initialization and save updated settings back to the file.
 
     Attributes:
-        config_file (str): Path to the configuration file used to store user settings.
-        last_selected_port (int): Index of the last selected COM port.
-        baud_rate (int): Baud rate for serial communication.
-        other_settings (dict): Additional user-specific settings.
+        config (ConfigParser): An instance of ConfigParser to manage configuration data.
+        last_selected_port (int): The last selected port, defaulting to 0 if not specified in the configuration.
 
     Methods:
         __init__():
-            Initializes the UserConfig instance and loads settings from the configuration file.
+            Initializes the AppConfig instance, loads settings from 'settings.ini',
+            and sets default values for user settings if not present.
         save_user_settings():
-            Saves the current user settings to the configuration file.
-        load_user_settings():
-            Loads user settings from the configuration file.
-        update_setting(key, value):
-            Updates a specific setting and saves it to the configuration file.
+            Saves the current user settings to 'settings.ini'.
     """
+
     def __init__(self):
         """
-        Initializes the UserConfig instance and loads settings from the configuration file.
+        Initializes the AppConfig instance.
 
-        - Sets default values for user settings.
-        - Attempts to load settings from the configuration file.
+        This method reads the configuration file 'settings.ini' and loads user settings.
+        If the file or specific settings are not present, it sets default values.
         """
-        self.config_file = "settings.ini"  # Path to the configuration file
-        self.last_selected_port = 0  # Default index for the last selected COM port
-        self.baud_rate = 115200  # Default baud rate for serial communication
-        self.other_settings = {}  # Dictionary for additional settings
-        self.load_user_settings()
+        self.config = configparser.ConfigParser()
+        self.config.read('settings.ini')
+        
+        # Set default values for user settings
+        self.last_selected_port = 0
+        
+        if 'user_settings' in self.config:
+            # Convert values to integers where necessary
+            self.last_selected_port = int(self.config['user_settings'].get('selected_port', 0))
+            print(f"Last selected port: {self.last_selected_port}")
 
+    
     def save_user_settings(self):
         """
-        Saves the current user settings to the configuration file.
+        Saves the current user settings to 'settings.ini'.
 
-        - Writes settings such as last selected port and baud rate to the file.
-        - Ensures settings are persisted across application sessions.
+        This method updates the configuration file with the latest user settings,
+        ensuring that all values are converted to strings before saving.
         """
-        # Example implementation for saving settings
-        pass
+        print("Saving user settings...")  # Debug statement
 
-    def load_user_settings(self):
-        """
-        Loads user settings from the configuration file.
+        if 'user_settings' not in self.config:
+            self.config['user_settings'] = {}
 
-        - Reads settings such as last selected port and baud rate from the file.
-        - Updates the instance attributes with the loaded values.
-        """
-        # Example implementation for loading settings
-        pass
+        # Convert all values to strings before saving
+        self.config['user_settings']['selected_port'] = str(self.last_selected_port)
 
-    def update_setting(self, key, value):
-        """
-        Updates a specific setting and saves it to the configuration file.
+        # Debug print to verify the values being saved
+        print("Config to save:", dict(self.config['user_settings']))
 
-        Args:
-            key (str): The name of the setting to update.
-            value: The new value for the setting.
+        # Write the settings to the file
+        with open('settings.ini', 'w') as configfile:
+            self.config.write(configfile)
 
-        - Updates the setting in memory.
-        - Saves the updated setting to the configuration file.
-        """
-        self.other_settings[key] = value
-        self.save_user_settings()
+        print("Settings saved!") 
+    

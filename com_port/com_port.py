@@ -40,4 +40,20 @@ class ComPort:
         self.vid = comport.vid  # The vendor ID of the COM port
         self.pid = comport.pid  # The product ID of the COM port
         self.serial_number = comport.serial_number  # The serial number of the COM port
-        self.location = comport.location  # The physical location of the COM
+        self.location = comport.location  # The physical location of the COM port
+        self.manufacturer = comport.manufacturer  # The manufacturer of the COM port
+        self.product = comport.product  # The product name of the COM port
+        self.interface = comport.interface  # The interface type of the COM port
+
+    @property
+    def UIString(self):
+        """
+        Returns a formatted string representation of the COM port for display in the UI.
+
+        The string includes the name and description of the COM port, making it easier
+        for users to identify the port in a dropdown or list.
+
+        Returns:
+            str: A formatted string combining the name and description of the COM port.
+        """
+        return f"{self.name} - {self.description}"
