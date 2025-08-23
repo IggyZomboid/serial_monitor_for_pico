@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QAbstractTableModel, Qt, QModelIndex, QPersistentModelIndex
+import csv
 
 class tracked_data_table_model(QAbstractTableModel):
     def __init__(self):
@@ -7,6 +8,14 @@ class tracked_data_table_model(QAbstractTableModel):
         self.headers = []  # Initial headers
         self.addHeader("Timestamp")  # Add a default header for timestamps
 
+        self.view = None # a placeholder for the view that will use this model and will be used to call back
+
+    def setView(self, view):
+        """
+        Sets the view that will use this model.
+        This allows the model to notify the view about changes.
+        """
+        self.view = view
 
     def rowCount(self, parent=None):
         return len(self.data)
@@ -85,4 +94,29 @@ class tracked_data_table_model(QAbstractTableModel):
         self.beginInsertRows(QModelIndex(), len(self.data), len(self.data))
         self.data.append(new_row)
         self.endInsertRows()
+        if self.view is not None:
+            self.view.autoScroll()
+        
         # signal that the layout has changed
+        
+    def saveDataToFile(self, file_path="data.csv"):
+        """
+        Saves the current data of the model to a CSV file.
+
+        Args:
+            file_path (str): The path to the CSV file. Defaults to 'data.csv'.
+        """
+        try:
+            with open(file_path, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                
+                # Write headers
+                writer.writerow(self.headers)
+                
+                # Write data rows
+                for row in self.data:
+                    writer.writerow(row)
+            
+            print(f"Data successfully saved to {file_path}")
+        except Exception as e:
+            print(f"Error saving data to file: {e}")

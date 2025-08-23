@@ -138,8 +138,34 @@
         <x>10</x>
         <y>10</y>
         <width>1161</width>
-        <height>711</height>
+        <height>681</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="auto_scroll_checkBox">
+      <property name="geometry">
+       <rect>
+        <x>1074</x>
+        <y>700</y>
+        <width>91</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Auto Scroll</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="save_data_pushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>700</y>
+        <width>75</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Save as CSV</string>
       </property>
      </widget>
     </widget>

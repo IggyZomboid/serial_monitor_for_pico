@@ -6,7 +6,6 @@ from com_port.com_port import ComPort
 from serial_reader.SerialReaderThread import SerialReaderThread
 from .Data_View_Window import DataViewWindow
 
-
 # Main Window Class
 class MainWindow(QtWidgets.QMainWindow):
     """
@@ -77,6 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clear_button = self.findChild(QtWidgets.QPushButton, 'clear_button')
         self.data_view_button = self.findChild(QtWidgets.QPushButton, 'data_view_button')
         self.output_text = self.findChild(QtWidgets.QTextEdit, 'output_text')
+
         self.output_text.setFont(font)
         
         # Update UserConfig fields when values change
