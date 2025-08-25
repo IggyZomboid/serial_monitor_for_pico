@@ -1,2 +1,3 @@
 PyQt5==5.15.9
 pyserial==3.5
+PyQt5 PyQtChart==5.15.0

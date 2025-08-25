@@ -49,7 +49,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="RegisterDataPoints">
      <attribute name="title">
@@ -166,6 +166,96 @@
       </property>
       <property name="text">
        <string>Save as CSV</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Chart_View_Tab">
+     <attribute name="title">
+      <string>Chart View</string>
+     </attribute>
+     <widget class="QWidget" name="chart_placeholder_widget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>1151</width>
+        <height>681</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="Data_Points_comboBox">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>10</y>
+        <width>301</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="add_to_chart_Button">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>10</y>
+        <width>75</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="remove_from_chart_Button">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>10</y>
+        <width>75</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Remove</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="amount_to_display_spinBox">
+      <property name="geometry">
+       <rect>
+        <x>770</x>
+        <y>10</y>
+        <width>111</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>10</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Scroll_back_button">
+      <property name="geometry">
+       <rect>
+        <x>684</x>
+        <y>10</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Scroll back</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Scroll_forward_button">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>10</y>
+        <width>81</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Scroll forward</string>
       </property>
      </widget>
     </widget>

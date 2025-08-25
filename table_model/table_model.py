@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QAbstractTableModel, Qt, QModelIndex, QPersistentModelIndex
+from PyQt5.QtCore import QAbstractTableModel, Qt, QModelIndex, QPersistentModelIndex, pyqtSignal
 import csv
 
 class tracked_data_table_model(QAbstractTableModel):
@@ -32,6 +32,8 @@ class tracked_data_table_model(QAbstractTableModel):
         addHeader(new_header):
             Dynamically adds a new header and updates the model.
     """
+    chartDataUpdated = pyqtSignal()  # Signal to notify that chart data has been updated
+
     def __init__(self):
         """
         Initializes the tracked_data_table_model instance.
@@ -40,10 +42,19 @@ class tracked_data_table_model(QAbstractTableModel):
         - Adds a default header for timestamps.
         """
         super(tracked_data_table_model, self).__init__()
-        self.data = []  # Initialize an empty list for rows
-        self.headers = []  # Initialize an empty list for column headers
+        self._rows = []  # Use a private attribute for rows
+        self._headers = []  # Use a private attribute for headers
         self.addHeader("Timestamp")  # Add a default header for timestamps
         self.view = None  # Placeholder for the view using this model
+
+    def getRows(self):
+        """
+        Returns the rows of the table model.
+
+        Returns:
+            list: The rows of the table model.
+        """
+        return self._rows
 
     def setView(self, view):
         """
@@ -66,7 +77,7 @@ class tracked_data_table_model(QAbstractTableModel):
         Returns:
             int: The number of rows in the data.
         """
-        return len(self.data)
+        return len(self._rows)
 
     def columnCount(self, parent=None):
         """
@@ -78,7 +89,7 @@ class tracked_data_table_model(QAbstractTableModel):
         Returns:
             int: The number of columns in the headers.
         """
-        return len(self.headers)
+        return len(self._headers)
 
     def data(self, index, role=Qt.DisplayRole):
         """
@@ -92,7 +103,7 @@ class tracked_data_table_model(QAbstractTableModel):
             Any: The data for the cell, or None if the role is not Qt.DisplayRole.
         """
         if role == Qt.DisplayRole:
-            return self.data[index.row()][index.column()]
+            return self._rows[index.row()][index.column()]
         return None
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
@@ -109,7 +120,7 @@ class tracked_data_table_model(QAbstractTableModel):
         """
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
-                return self.headers[section]  # Return column headers
+                return self._headers[section]  # Return column headers
             else:
                 return f"Row {section + 1}"  # Return row numbers as strings
         return None
@@ -127,11 +138,11 @@ class tracked_data_table_model(QAbstractTableModel):
         """
         print(f"Adding new header: {new_header}")
         try:
-            self.headers.append(new_header)
+            self._headers.append(new_header)
             newColumn = self.columnCount()
             self.beginInsertColumns(QModelIndex(), newColumn, newColumn)
             # update existing data to include the new column
-            for row in self.data:
+            for row in self._rows:
                 row.append(None)
             self.endInsertColumns()
             
@@ -151,16 +162,16 @@ class tracked_data_table_model(QAbstractTableModel):
         print(f"Adding/updating row with timestamp: {time_stamp}, data point: {data_point_name}, value: {data_value}")
         
         # Ensure the data_point_name exists in the headers
-        if data_point_name not in self.headers:
+        if data_point_name not in self._headers:
             print(f"Header '{data_point_name}' not found, adding it.")
             self.addHeader(data_point_name)
 
-        print(f"Current headers: {self.headers}")
+        print(f"Current headers: {self._headers}")
         # Search for a row with the matching timestamp
-        for row_index, row in enumerate(self.data):
+        for row_index, row in enumerate(self._rows):
             if row[0] == time_stamp:  # Assuming timestamp is in the first column
                 # Update the value in the corresponding column
-                column_index = self.headers.index(data_point_name)
+                column_index = self._headers.index(data_point_name)
                 if len(row) <= column_index:
                     row.extend([None] * (column_index - len(row) + 1))  # Extend row if necessary
                 row[column_index] = data_value
@@ -169,20 +180,24 @@ class tracked_data_table_model(QAbstractTableModel):
                 top_left = self.index(row_index, column_index)
                 bottom_right = self.index(row_index, column_index)
                 self.dataChanged.emit(top_left, bottom_right)
+
+                # Emit the chart update signal
+                self.chartDataUpdated.emit()
                 return
 
         # If no matching row is found, add a new row
-        new_row = [None] * len(self.headers)
+        new_row = [None] * len(self._headers)
         new_row[0] = time_stamp  # Set the timestamp in the first column
-        column_index = self.headers.index(data_point_name)
+        column_index = self._headers.index(data_point_name)
         new_row[column_index] = data_value
-        self.beginInsertRows(QModelIndex(), len(self.data), len(self.data))
-        self.data.append(new_row)
+        self.beginInsertRows(QModelIndex(), len(self._rows), len(self._rows))
+        self._rows.append(new_row)
         self.endInsertRows()
         if self.view is not None:
             self.view.autoScroll()
-        
-        # signal that the layout has changed
+
+        # Emit the chart update signal
+        self.chartDataUpdated.emit()
         
     def saveDataToFile(self, file_path="data.csv"):
         """
@@ -196,10 +211,10 @@ class tracked_data_table_model(QAbstractTableModel):
                 writer = csv.writer(file)
                 
                 # Write headers
-                writer.writerow(self.headers)
+                writer.writerow(self._headers)
                 
                 # Write data rows
-                for row in self.data:
+                for row in self._rows:
                     writer.writerow(row)
             
             print(f"Data successfully saved to {file_path}")
