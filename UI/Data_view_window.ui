@@ -183,61 +183,12 @@
        </rect>
       </property>
      </widget>
-     <widget class="QComboBox" name="Data_Points_comboBox">
-      <property name="geometry">
-       <rect>
-        <x>11</x>
-        <y>10</y>
-        <width>301</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="add_to_chart_Button">
-      <property name="geometry">
-       <rect>
-        <x>320</x>
-        <y>10</y>
-        <width>75</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Add</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="remove_from_chart_Button">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>10</y>
-        <width>75</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Remove</string>
-      </property>
-     </widget>
-     <widget class="QSpinBox" name="amount_to_display_spinBox">
-      <property name="geometry">
-       <rect>
-        <x>770</x>
-        <y>10</y>
-        <width>111</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>10</number>
-      </property>
-     </widget>
      <widget class="QPushButton" name="Scroll_back_button">
       <property name="geometry">
        <rect>
         <x>684</x>
         <y>10</y>
-        <width>81</width>
+        <width>151</width>
         <height>24</height>
        </rect>
       </property>
@@ -248,9 +199,9 @@
      <widget class="QPushButton" name="Scroll_forward_button">
       <property name="geometry">
        <rect>
-        <x>890</x>
+        <x>840</x>
         <y>10</y>
-        <width>81</width>
+        <width>131</width>
         <height>24</height>
        </rect>
       </property>

@@ -106,7 +106,7 @@ class DataViewWindow(QtWidgets.QMainWindow):
         self.tabWidget.setCurrentIndex(0)  # Set the first tab as the current tab
         self.show()
 
-        self.resetDataPointNames()
+#        self.resetDataPointNames()
 
         # --- 500 ms refresh timer (updates even with no data) ---
         self.update_timer = QTimer(self)
@@ -167,16 +167,16 @@ class DataViewWindow(QtWidgets.QMainWindow):
         self.shared_config.dataPointNames.clear()
         self.dataPointName_listWidget.clear()
 
-    def resetDataPointNames(self):
-        """
-        Repopulates the names list and combo from shared_config.
-        """
-        self.dataPointName_listWidget.clear()
-        self.Data_Points_comboBox.clear()
-        count = len(self.shared_config.dataPointNames)
-        if count != 0:
-            self.dataPointName_listWidget.addItems(self.shared_config.dataPointNames)
-            self.Data_Points_comboBox.addItems(self.shared_config.dataPointNames)
+#   def resetDataPointNames(self):
+#       """
+#       Repopulates the names list and combo from shared_config.
+#       """
+#       self.dataPointName_listWidget.clear()
+#       self.Data_Points_comboBox.clear()
+#       count = len(self.shared_config.dataPointNames)
+#       if count != 0:
+#           self.dataPointName_listWidget.addItems(self.shared_config.dataPointNames)
+#           self.Data_Points_comboBox.addItems(self.shared_config.dataPointNames)
 
     def closeEvent(self, event):
         """
